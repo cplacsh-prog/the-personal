@@ -68,10 +68,22 @@ def ask_gpt4o(api_key, image_url): # GPT는 이미지 URL 혹은 Base64 필요 (
     return {"verdict": "위험", "score": 40, "reason": "GPT-4o: 시급 9860원은 2025년 기준 미달입니다."} 
 
 def ask_gemini(api_key, image):
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    response = model.generate_content([COMMON_PROMPT, image], generation_config={"response_mime_type": "application/json"})
-    return json.loads(response.text)
+    try:
+        genai.configure(api_key=api_key)
+        
+        # [수정] 가장 안정적인 표준 모델명으로 고정
+        # 실험용(exp)이나 최신(2.5) 대신 '1.5-flash'를 씁니다.
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        response = model.generate_content(
+            [COMMON_PROMPT, image], 
+            generation_config={"response_mime_type": "application/json"}
+        )
+        return json.loads(response.text)
+        
+    except Exception as e:
+        # 에러가 나면 멈추지 말고 에러 메시지를 리턴하도록 예외 처리
+        return {"verdict": "에러", "score": 0, "reason": f"Gemini 분석 중 오류 발생: {str(e)}"}
 
 def ask_gpt4o_real(api_key, base64_image):
     client = OpenAI(api_key=api_key)
@@ -158,3 +170,4 @@ if uploaded_file and st.button("🚀 교차 검증 시작 (Double Check)"):
             
             # 링크는 실제 연결하고 싶은 주소로 바꾸세요
             st.link_button("👑 대표 노무사에게 최종 판결 요청하기 (유료)", "https://open.kakao.com/o/sYourLink")
+
