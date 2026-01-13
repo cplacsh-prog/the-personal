@@ -20,13 +20,25 @@ st.markdown("""
 st.title("⚖️ THE PERSONAL : AI Cross-Check System")
 st.markdown("**GPT-4o**와 **Gemini Pro**가 교차 검증하여 완벽한 법률 자문을 제공합니다.")
 
-# --- 3. API 키 설정 (사이드바) ---
+# --- 3. API 키 설정 (스마트 오토매틱 버전) ---
 with st.sidebar:
     st.header("🔑 엔진 키 설정")
-    openai_key = st.text_input("OpenAI API Key (GPT-4o)", type="password")
-    google_key = st.text_input("Google API Key (Gemini)", type="password")
     
-    st.info("두 개의 두뇌를 동시에 사용하여 정확도를 극대화합니다.")
+    # 1. OpenAI 키 확인
+    if "OPENAI_API_KEY" in st.secrets:
+        openai_key = st.secrets["OPENAI_API_KEY"]
+        st.success("✅ GPT-4o 엔진 장착 완료")
+    else:
+        openai_key = st.text_input("OpenAI Key (sk-...)", type="password")
+
+    # 2. Google 키 확인
+    if "GOOGLE_API_KEY" in st.secrets:
+        google_key = st.secrets["GOOGLE_API_KEY"]
+        st.success("✅ Gemini 엔진 장착 완료")
+    else:
+        google_key = st.text_input("Google Key (AIza...)", type="password")
+    
+    st.info("두 개의 두뇌(GPT + Gemini)가 교차 검증합니다.")
 
 # --- 4. 분석 프롬프트 (공통) ---
 COMMON_PROMPT = """
@@ -136,3 +148,4 @@ if uploaded_file and st.button("🚀 교차 검증 시작 (Double Check)"):
         else:
             st.error("🚨 **[판정 불일치] 전문가 확인 필수**")
             st.markdown(f"Gemini는 **{result_gemini['verdict']}**, GPT는 **{result_gpt['verdict']}
+
