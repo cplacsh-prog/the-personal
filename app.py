@@ -28,11 +28,18 @@ st.markdown('<div class="sub-title">Powered by Google Gemini</div>', unsafe_allo
 
 with st.sidebar:
     st.header("⚙️ 설정")
-    # 구글 API 키 입력받기
-    api_key = st.text_input("Google API 키를 입력하세요", type="password")
+    
+    # 1. 금고(Secrets)에 키가 있는지 먼저 확인
+    if "GOOGLE_API_KEY" in st.secrets:
+        api_key = st.secrets["GOOGLE_API_KEY"]
+        st.success("✅ 인증 키가 자동으로 적용되었습니다.")
+    else:
+        # 2. 금고에 없으면 직접 입력받음 (로컬 테스트용)
+        api_key = st.text_input("Google API 키를 입력하세요", type="password")
+        
     st.info("※ [aistudio.google.com]에서 무료로 발급 가능합니다.")
     st.markdown("---")
-    st.markdown("**노무사 사무소 퍼스널**\n\n문의: 02-0000-0000")
+    st.markdown("**노무사 사무소 퍼스널**\n\n문의: 032-229-9910")
 
 # --- 4. Gemini 분석 함수 ---
 def analyze_contract_gemini(api_key, image):
@@ -117,4 +124,5 @@ if uploaded_file is not None:
                     st.link_button("👑 노무사 사무소 퍼스널 연결 (30,000원)", "[https://open.kakao.com/o/sYourLink](https://open.kakao.com/o/sYourLink)")
 
                 except Exception as e:
+
                     st.error(f"오류가 발생했습니다: {e}")
