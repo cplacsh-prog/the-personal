@@ -123,7 +123,7 @@ if uploaded_file and st.button("🚀 교차 검증 시작 (Double Check)"):
                 result_gemini = future_gemini.result()
                 result_gpt = future_gpt.result()
         
-        # --- 결과 비교 및 통합 ---
+# --- 결과 비교 및 통합 (이 부분을 덮어씌우세요) ---
         st.divider()
         st.subheader("📊 검증 리포트")
         
@@ -147,5 +147,14 @@ if uploaded_file and st.button("🚀 교차 검증 시작 (Double Check)"):
             st.markdown(f"**통합 의견:** {result_gpt['reason']}")
         else:
             st.error("🚨 **[판정 불일치] 전문가 확인 필수**")
-            st.markdown(f"Gemini는 **{result_gemini['verdict']}**, GPT는 **{result_gpt['verdict']}
-
+            
+            # [수정된 부분] 안전하게 따옴표 3개(""")를 사용했습니다.
+            st.markdown(f"""
+            Gemini는 **{result_gemini['verdict']}**, 
+            GPT는 **{result_gpt['verdict']}**라고 합니다.
+            """)
+            
+            st.warning("이런 경우, 애매한 조항이 있거나 법적 해석이 갈릴 수 있으므로 **사람(노무사)의 직접 검토**가 반드시 필요합니다.")
+            
+            # 링크는 실제 연결하고 싶은 주소로 바꾸세요
+            st.link_button("👑 대표 노무사에게 최종 판결 요청하기 (유료)", "https://open.kakao.com/o/sYourLink")
