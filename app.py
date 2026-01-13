@@ -58,14 +58,41 @@ COMMON_PROMPT = """
 """
 
 # --- 5. 개별 AI 함수 ---
-def ask_gpt4o(api_key, image_url): # GPT는 이미지 URL 혹은 Base64 필요 (여기선 편의상 텍스트 설명으로 가정하거나, 실제 구현시 Base64 변환 필요)
-    # *참고: 실제 GPT-4o Vision 연동은 코드가 길어져서, 여기선 Gemini 코드를 재활용하는 방식으로 시뮬레이션 하거나 
-    # 실제로는 base64 인코딩 함수가 추가로 필요합니다. 지금은 로직 흐름 위주로 작성합니다.
-    client = OpenAI(api_key=api_key)
-    # (이미지 처리 로직 생략 - 실제로는 Base64 인코딩해서 보내야 함)
-    # 여기서는 GPT가 텍스트만 처리한다고 가정하고 더미(Dummy) 로직 대신, 
-    # 실제로는 Gemini와 동일하게 이미지를 봐야 합니다.
-    return {"verdict": "위험", "score": 40, "reason": "GPT-4o: 시급 9860원은 2025년 기준 미달입니다."} 
+def ask_gpt4o_real(api_key, base64_image):
+    try:
+        client = OpenAI(api_key=api_key)
+        response = client.chat.completions.create(
+            model="gpt-4o", # 돈이 아까우면 "gpt-4o-mini"로 바꾸세요 (훨씬 쌈)
+            messages=[
+                {
+                    "role": "system", 
+                    "content": "You are a legal expert. Return JSON only."
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": COMMON_PROMPT},
+                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+                    ]
+                }
+            ],
+            response_format={"type": "json_object"}
+        )
+        return json.loads(response.choices[0].message.content)
+
+    except Exception as e:
+        # 에러가 나면 앱을 끄지 말고, 에러 메시지를 예쁘게 포장해서 리턴함
+        error_msg = str(e)
+        if "RateLimit" in error_msg:
+            reason = "OpenAI 잔액 부족 또는 한도 초과입니다. (결제 필요)"
+        else:
+            reason = f"GPT 연결 실패: {error_msg}"
+            
+        return {
+            "verdict": "판독불가", 
+            "score": 0, 
+            "reason": reason
+        }
 
 def ask_gemini(api_key, image):
     try:
@@ -170,4 +197,5 @@ if uploaded_file and st.button("🚀 교차 검증 시작 (Double Check)"):
             
             # 링크는 실제 연결하고 싶은 주소로 바꾸세요
             st.link_button("👑 대표 노무사에게 최종 판결 요청하기 (유료)", "https://open.kakao.com/o/sYourLink")
+
 
